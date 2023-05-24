@@ -1,8 +1,6 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Algoritmo {
 
@@ -18,7 +16,7 @@ public class Algoritmo {
         Categoria[] coloracoes = new Categoria[numVertices];
         graphColoring(graph, cores, 0, coloracoes);
     }
-
+//todo Atual problema é que ele nao esta mostrando a categoria certa. REVISAR o que queremos mostrar e comparar com o que ele esta mostrando
     private void graphColoring(int[][] graph, Categoria[] cores, int vertice, Categoria[] coloracoes) {
         int numVertices = graph.length;
         if (vertice == numVertices) {
@@ -50,12 +48,22 @@ public class Algoritmo {
     }
 
     private void printSolution(Categoria[] coloracoes) {
+        Map<Categoria, List<String>> produtosPorCategoria = new HashMap<>();
+
         for (Categoria categoria : Categoria.values()) {
-            System.out.println("Produtos da categoria " + categoria + ":");
-            for (int i = 0; i < coloracoes.length; i++) {
-                if (coloracoes[i] == categoria) {
-                    System.out.println(listaProdutos.get(i).getNome());
-                }
+            produtosPorCategoria.put(categoria, new ArrayList<>());
+        }
+
+        for (int i = 0; i < coloracoes.length; i++) {
+            Categoria categoria = coloracoes[i];
+            produtosPorCategoria.get(categoria).add(listaProdutos.get(i).getNome());
+        }
+
+        for (Categoria categoria : Categoria.values()) {
+            List<String> produtos = produtosPorCategoria.get(categoria);
+            System.out.println("*** Produtos da categoria " + categoria + ": ***");
+            for (String produto : produtos) {
+                System.out.println(produto);
             }
             System.out.println(); // linha em branco entre as categorias
         }
