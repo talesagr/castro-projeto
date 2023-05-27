@@ -18,25 +18,26 @@ public class Algoritmo {
     }
 //todo Atual problema é que ele nao esta mostrando a categoria certa. REVISAR o que queremos mostrar e comparar com o que ele esta mostrando
     private void graphColoring(int[][] graph, Categoria[] cores, int vertice, Categoria[] coloracoes) {
-        int numVertices = graph.length;
-        if (vertice == numVertices) {
-            printSolution(coloracoes);
-            solutionFound = true;
-            return;
-        }
+    int numVertices = graph.length;
+    if (vertice == numVertices) {
+        printSolution(coloracoes);
+        solutionFound = true;
+        return;
+    }
 
-        for (Categoria cor : cores) {
-            if (isColorValid(graph, coloracoes, vertice, cor)) {
-                coloracoes[vertice] = cor;
-                graphColoring(graph, cores, vertice + 1, coloracoes);
-                coloracoes[vertice] = null; // backtrack
+    for (Categoria cor : cores) {
+        if (isColorValid(graph, coloracoes, vertice, cor)) {
+            coloracoes[vertice] = cor;
+            graphColoring(graph, cores, vertice + 1, coloracoes);
+            coloracoes[vertice] = null; // backtrack
 
-                if (solutionFound) {
-                    return;
-                }
+            if (solutionFound) {
+                return;
             }
         }
     }
+}
+
 
     private boolean isColorValid(int[][] graph, Categoria[] coloracoes, int vertice, Categoria cor) {
         for (int i = 0; i < graph.length; i++) {

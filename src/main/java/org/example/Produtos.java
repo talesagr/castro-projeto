@@ -1,6 +1,6 @@
 package org.example;
 
-public class Produtos {
+public class    Produtos {
     String nome;
     Categoria categoria;
 
