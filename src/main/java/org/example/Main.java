@@ -1,6 +1,5 @@
-package org.example;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,183 +7,284 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        List<Produtos> listaProdutos = new ArrayList<>();
-        Map<Produtos, Categoria> grafo = new HashMap<>();
-        Categoria[] categorias = {Categoria.FERRO, Categoria.COMIDA, Categoria.FRIOS};
+        Scanner scanner = new Scanner(System.in);
+        List<Categoria> categorias = new ArrayList<>();
+        List<Produto> produtos = new ArrayList<>();
+        List<Genero> generos = criarGenerosFixos();
 
-        int acao = 0;
-        while (acao != 4) {
-            menu();
+        int opcao;
+        do {
+            exibirMenu();
+            opcao = scanner.nextInt();
+            scanner.nextLine(); // Limpar o buffer do scanner
 
-            acao = sc.nextInt();
-            if (acao == 1) {
-                System.out.println("***       PRODUTOS      ***");
-                for (int i = 0; i < listaProdutos.size(); i++) {
-                    System.out.println(i + "- NOME: " + listaProdutos.get(i).getNome() + ", CATEGORIA: " + listaProdutos.get(i).getCategoria());
-                }
-                System.out.println();
-            } else if (acao == 2) {
-                System.out.println("*** AQUI ESTÁ SEU ARMAZÉM: ***");
+            switch (opcao) {
+                case 1:
+                    cadastrarCategoria(scanner, categorias, generos);
+                    break;
+                case 2:
+                    cadastrarProduto(scanner, categorias, produtos);
+                    break;
+                case 3:
+                    exibirCategorias(categorias);
+                    break;
+                case 4:
+                    exibirProdutos(produtos);
+                    break;
+                case 5:
+                    organizarEstoque(categorias, generos);
+                    exibirArmazem(categorias, produtos);
+                    break;
+                case 0:
+                    System.out.println("Saindo...");
+                    break;
+                default:
+                    System.out.println("Opção inválida. Digite novamente.");
+                    break;
+            }
+        } while (opcao != 0);
+    }
 
-                for (Produtos produto : listaProdutos) {
-                    grafo.put(produto, produto.getCategoria());
-                }
+    private static void exibirMenu() {
+        System.out.println("***     MENU     ***");
+        System.out.println("1- Cadastrar categoria");
+        System.out.println("2- Cadastrar produto");
+        System.out.println("3- Exibir categorias");
+        System.out.println("4- Exibir produtos");
+        System.out.println("5- Organizar estoque");
+        System.out.println("0- Sair");
+        System.out.println("*******************");
+        System.out.println("Digite a opção desejada:");
+    }
 
-                if (listaProdutos.isEmpty()) {
-                    System.out.println("Seu armazém está vazio. Adicione produtos antes de realizar a coloração do grafo.");
-                } else {
-                    GrafoColoracao grafoColoracao = new GrafoColoracao(grafo, categorias);
-                    grafoColoracao.colorirGrafo();
-                }
-                System.out.println();
-            } else if (acao == 3) {
-                cadastrarProduto(sc, listaProdutos);
-                System.out.println("Produto cadastrado com sucesso!");
-                System.out.println();
-            } else if (acao == 4) {
-                System.out.println("Encerrando o programa. Obrigado por utilizar!");
-            } else {
-                System.out.println("Opção inválida. Por favor, selecione uma opção válida.");
-                System.out.println();
+    private static List<Genero> criarGenerosFixos() {
+        List<Genero> generos = new ArrayList<>();
+
+        // Gêneros que podem ser agrupados juntos
+        List<String> alimentos = Arrays.asList("Alimentos", "Bebidas");
+        List<String> automoveis = Arrays.asList("Automóveis");
+        List<String> beleza = Arrays.asList("Beleza", "Saúde");
+        List<String> calcados = Arrays.asList("Calçados");
+        // ...
+
+        generos.add(new Genero("Alimentos", alimentos));
+        generos.add(new Genero("Automóveis", automoveis));
+        generos.add(new Genero("Beleza", beleza));
+        generos.add(new Genero("Calçados", calcados));
+        // ...
+
+        return generos;
+    }
+
+    private static void exibirProdutos(List<Produto> produtos) {
+        System.out.println("***        PRODUTOS        ***");
+        if (produtos.isEmpty()) {
+            System.out.println("Nenhum produto cadastrado.");
+        } else {
+            for (Produto produto : produtos) {
+                System.out.println("PRODUTO: " + produto.getNome() + " | CATEGORIA: " + produto.getCategoria().getNome());
             }
         }
+        System.out.println("*****************************");
     }
 
-    private static void menu() {
-        System.out.println("***    SEJA BEM-VINDO   ***");
-        System.out.println("***          AO         ***");
-        System.out.println("*** COLORAÇÃO DE GRAFOS ***");
-        System.out.println("***          MENU       ***");
-        System.out.println("*** 1 - MEUS PRODUTOS   ***");
-        System.out.println("*** 2 - MEU ARMAZÉM     ***");
-        System.out.println("*** 3 - CADASTRAR PRODUTO ***");
-        System.out.println("*** 4 - SAIR            ***");
-        System.out.println("*** O QUE DESEJA FAZER? ***");
+    private static void exibirCategorias(List<Categoria> categorias) {
+        System.out.println("***      CATEGORIAS      ***");
+        if (categorias.isEmpty()) {
+            System.out.println("Nenhuma categoria cadastrada.");
+        } else {
+            for (int i = 0; i < categorias.size(); i++) {
+                Categoria categoria = categorias.get(i);
+                System.out.println((i + 1) + "- CATEGORIA: " + categoria.getNome() + " | GÊNERO: " + categoria.getGenero().getNome());
+            }
+        }
+        System.out.println("***************************");
     }
 
-    private static void cadastrarProduto(Scanner sc, List<Produtos> listaProdutos) {
-        System.out.println("*** CADASTRAR PRODUTO ***");
-        System.out.println("Informe o nome do produto:");
-        String nome = sc.next();
-        System.out.println("Informe a categoria do produto (0 - FERRO, 1 - COMIDA, 2 - FRIOS):");
-        int categoria = sc.nextInt();
+    private static void cadastrarCategoria(Scanner scanner, List<Categoria> categorias, List<Genero> generos) {
+        System.out.println("Digite o nome da categoria:");
+        String nomeCategoria = scanner.nextLine();
 
-        Categoria categoriaProduto;
-        switch (categoria) {
-            case 0:
-                categoriaProduto = Categoria.FERRO;
-                break;
-            case 1:
-                categoriaProduto = Categoria.COMIDA;
-                break;
-            case 2:
-                categoriaProduto = Categoria.FRIOS;
-                break;
-            default:
-                System.out.println("Categoria inválida. O produto será cadastrado como Categoria.FERRO.");
-                categoriaProduto = Categoria.FERRO;
-                break;
+        System.out.println("Escolha o gênero da categoria:");
+        exibirGeneros(generos);
+
+        int opcaoGenero = scanner.nextInt();
+        scanner.nextLine(); // Limpar o buffer do scanner
+
+        if (opcaoGenero < 1 || opcaoGenero > generos.size()) {
+            System.out.println("Opção inválida. Categoria não cadastrada.");
+        } else {
+            Genero generoSelecionado = generos.get(opcaoGenero - 1);
+            Categoria novaCategoria = new Categoria(nomeCategoria, generoSelecionado);
+            categorias.add(novaCategoria);
+            System.out.println("Categoria cadastrada com sucesso.");
+        }
+    }
+
+    private static void exibirGeneros(List<Genero> generos) {
+        System.out.println("Escolha o gênero:");
+        for (int i = 0; i < generos.size(); i++) {
+            System.out.println((i + 1) + "- " + generos.get(i).getNome());
+        }
+    }
+
+    private static void cadastrarProduto(Scanner scanner, List<Categoria> categorias, List<Produto> produtos) {
+        if (categorias.isEmpty()) {
+            System.out.println("Não há categorias cadastradas. Cadastre uma categoria antes de adicionar um produto.");
+            return;
         }
 
-        Produtos produto = new Produtos(nome, categoriaProduto);
-        listaProdutos.add(produto);
+        System.out.println("Digite o nome do produto:");
+        String nomeProduto = scanner.nextLine();
+
+        System.out.println("Escolha a categoria do produto:");
+        exibirCategorias(categorias);
+
+        int opcaoCategoria = scanner.nextInt();
+        scanner.nextLine(); // Limpar o buffer do scanner
+
+        if (opcaoCategoria < 1 || opcaoCategoria > categorias.size()) {
+            System.out.println("Opção inválida. Produto não cadastrado.");
+        } else {
+            Categoria categoriaSelecionada = categorias.get(opcaoCategoria - 1);
+            Produto novoProduto = new Produto(nomeProduto, categoriaSelecionada);
+            produtos.add(novoProduto);
+            System.out.println("Produto cadastrado com sucesso.");
+        }
+    }
+
+    private static void organizarEstoque(List<Categoria> categorias, List<Genero> generos) {
+        int numCategorias = categorias.size();
+        boolean[][] grafo = new boolean[numCategorias][numCategorias];
+
+        // Cria uma matriz de adjacência com base nas restrições de gênero
+        for (int i = 0; i < numCategorias; i++) {
+            Categoria categoriaI = categorias.get(i);
+            for (int j = i + 1; j < numCategorias; j++) {
+                Categoria categoriaJ = categorias.get(j);
+                if (categoriaI.getGenero().equals(categoriaJ.getGenero())) {
+                    grafo[i][j] = true;
+                    grafo[j][i] = true;
+                }
+            }
+        }
+
+        int[] cores = new int[numCategorias];
+        Arrays.fill(cores, -1);
+
+        if (backtracking(grafo, cores, 0, generos.size())) {
+            System.out.println("Estoque organizado com sucesso.\n");
+
+            // Agrupa as categorias por cor
+            Map<Integer, List<Categoria>> grupos = new HashMap<>();
+            for (int i = 0; i < numCategorias; i++) {
+                int cor = cores[i];
+                if (!grupos.containsKey(cor)) {
+                    grupos.put(cor, new ArrayList<>());
+                }
+                grupos.get(cor).add(categorias.get(i));
+            }
+
+            // Exibe as categorias agrupadas por cor
+            for (List<Categoria> grupo : grupos.values()) {
+                System.out.println("Grupo de categorias:");
+                for (Categoria categoria : grupo) {
+                    System.out.println("- " + categoria.getNome());
+                }
+                System.out.println();
+            }
+        } else {
+            System.out.println("Não é possível organizar o estoque de acordo com as restrições de gênero.");
+        }
+    }
+
+    private static boolean backtracking(boolean[][] grafo, int[] cores, int posicao, int numCores) {
+        if (posicao == cores.length) {
+            return true;
+        }
+
+        for (int cor = 0; cor < numCores; cor++) {
+            if (ehCorSegura(grafo, cores, posicao, cor)) {
+                cores[posicao] = cor;
+                if (backtracking(grafo, cores, posicao + 1, numCores)) {
+                    return true;
+                }
+                cores[posicao] = -1;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean ehCorSegura(boolean[][] grafo, int[] cores, int posicao, int cor) {
+        for (int i = 0; i < grafo.length; i++) {
+            if (grafo[posicao][i] && cores[i] == cor) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void exibirArmazem(List<Categoria> categorias, List<Produto> produtos) {
+        System.out.println("***        ARMAZÉM        ***");
+        for (Categoria categoria : categorias) {
+            System.out.println("CATEGORIA: " + categoria.getNome() + " | GÊNERO: " + categoria.getGenero().getNome());
+            System.out.println("PRODUTOS:");
+            for (Produto produto : produtos) {
+                if (produto.getCategoria().equals(categoria)) {
+                    System.out.println("- " + produto.getNome());
+                }
+            }
+            System.out.println("------------------------------");
+        }
+        System.out.println("*****************************");
     }
 }
 
-class GrafoColoracao {
-    private Map<Produtos, Categoria> grafo;
-    private Categoria[] categorias;
-    private int[] cores;
-    private int numCores;
+class Genero {
+    private String nome;
 
-    public GrafoColoracao(Map<Produtos, Categoria> grafo, Categoria[] categorias) {
-        this.grafo = grafo;
-        this.categorias = categorias;
-        this.cores = new int[grafo.size()];
-        this.numCores = categorias.length;
+    public Genero(String nome) {
+        this.nome = nome;
     }
 
-    public void colorirGrafo() {
-        if (podeColorir()) {
-            colorirRecursivamente(0);
-            exibirColoracao();
-        } else {
-            System.out.println("Não é possível colorir o grafo com as categorias disponíveis.");
-        }
+    public String getNome() {
+        return nome;
+    }
+}
+
+class Categoria {
+    private String nome;
+    private Genero genero;
+
+    public Categoria(String nome, Genero genero) {
+        this.nome = nome;
+        this.genero = genero;
     }
 
-    private boolean podeColorir() {
-        return numCores >= grafo.size();
+    public String getNome() {
+        return nome;
     }
 
-    private void colorirRecursivamente(int produtoIndex) {
-        if (produtoIndex == grafo.size()) {
-            return; // Todos os produtos foram coloridos
-        }
+    public Genero getGenero() {
+        return genero;
+    }
+}
 
-        Produtos produto = (Produtos) grafo.keySet().toArray()[produtoIndex];
+class Produto {
+    private String nome;
+    private Categoria categoria;
 
-        for (int cor = 1; cor <= numCores; cor++) {
-            if (podeAtribuirCor(produto, cor)) {
-                cores[produtoIndex] = cor;
-
-                if (podeColorirRestante(produtoIndex)) {
-                    colorirRecursivamente(produtoIndex + 1);
-                }
-
-                cores[produtoIndex] = 0; // Reseta a cor para tentar outra cor
-            }
-        }
+    public Produto(String nome, Categoria categoria) {
+        this.nome = nome;
+        this.categoria = categoria;
     }
 
-    private boolean podeAtribuirCor(Produtos produto, int cor) {
-        for (Map.Entry<Produtos, Categoria> entry : grafo.entrySet()) {
-            Produtos adjacente = entry.getKey();
-            Categoria categoria = entry.getValue();
-
-            if (grafo.get(produto).equals(categoria) && cores[getIndex(adjacente)] == cor) {
-                return false; // Produto adjacente já possui a mesma cor
-            }
-        }
-        return true;
+    public String getNome() {
+        return nome;
     }
 
-    private boolean podeColorirRestante(int produtoIndex) {
-        if (produtoIndex == grafo.size() - 1) {
-            return true; // Todos os produtos foram coloridos
-        }
-
-        for (int i = produtoIndex + 1; i < grafo.size(); i++) {
-            Produtos produto = (Produtos) grafo.keySet().toArray()[i];
-            if (!podeAtribuirCor(produto, cores[produtoIndex])) {
-                return false; // Existe um produto adjacente com a mesma cor
-            }
-        }
-        return true;
-    }
-
-    private void exibirColoracao() {
-        System.out.println("*** COLORAÇÃO DO GRAFO ***");
-        int index = 0;
-        for (Map.Entry<Produtos, Categoria> entry : grafo.entrySet()) {
-            Produtos produto = entry.getKey();
-            Categoria categoria = entry.getValue();
-            int cor = cores[index];
-            index++;
-
-            System.out.println("Produto: " + produto.getNome() + ", Categoria: " + categoria + ", Cor: " + cor);
-        }
-    }
-
-    private int getIndex(Produtos produto) {
-        int index = 0;
-        for (Produtos p : grafo.keySet()) {
-            if (p.equals(produto)) {
-                return index;
-            }
-            index++;
-        }
-        return -1;
+    public Categoria getCategoria() {
+        return categoria;
     }
 }
